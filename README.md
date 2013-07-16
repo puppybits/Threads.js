@@ -13,24 +13,39 @@
 ## Examples
 
 Example: Synchronous Processing
-
-    var result = Thread(function(localArg1, localArg2){
-      //...access localArg1 and localArg2
-      //...do stuff like, xhr, image processing on a background thread
-      return result;
+    
+    var num1 = 1, // main UI thread
+    num2 = 2,
+    result = Thread(function(num1, num2){
+      var result;
+      for (var i = 0; i < 10000000; i++) // background worker thread
+      {
+        result = num1 + num2;
+        num1 = num2;
+        num2 = result;
+      }
+      return num1;
     }, 
-    [localArg1, localArg2]);
+    [num1, num2]); // pass in the variables for when the function is called
+    
+    console.log(result); // main UI Thread
 
 Example: Asynchronous Processing
 
-    Thread(function(localArg1, localArg2){
-      //...do stuff like, xhr, image processing on a background thread
-      var done = arguments[arguments.length-2];
-      done(result);
+
+    var uri = 'http://localhost:8000/api/planning'; // main UI Thread
+    Thread(function(uri){
+      var done = arguments[arguments.length-2], // background worker thread
+      xhr = new XMLHttpRequest();
+      xhr.open('GET', uri);
+      xhr.onload = function(e) 
+      { 
+        done(e.responseText);
+      }
     }, 
-    [localArg1, localArg2], 
+    [uri], // pass in the variables for when the function is called
     function(results){
-      //...recieve result in the main thread
+      console.log(results); // main UI Thread
     });
     
 or
