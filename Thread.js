@@ -55,7 +55,7 @@ Thread will run the processing on the main UI thread if Workers are not supporte
 var Thread = function(fn, args, callback)
 {
   var forceSingleThread = false,
-  useThreads = (Blob && Worker && URL.createObjectURL && (forceSingleThread !== false)),
+  useThreads = (Blob && Worker && URL.createObjectURL && (forceSingleThread !== true)),
   
   createThread = function(fnc, args, callback)
   {
@@ -75,7 +75,7 @@ var Thread = function(fn, args, callback)
       'if (returnValue) done(returnValue);\n'+
       '};';
     
-    var compile = new Blob([synchronousAction]),
+    var compile = new Blob([synchronousAction], {type: 'text/javascript'}),
     serizedAction = window.URL.createObjectURL(compile),
     thread = new Worker(serizedAction);
     thread.addEventListener('message', function(e)
